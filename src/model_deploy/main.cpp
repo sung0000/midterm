@@ -32,20 +32,17 @@ Serial pc(USBTX, USBRX);
 int currentSong = 0;
 int mode = 0; 
 bool uLCD_cls = 0;
-int song[120];
-int noteLength[120];
+int song[108];
+int noteLength[108];
 int serialCount = 0;
 int gesture_index;
 char serialInBuffer[bufferLength];
 
 void playNote(int freq){
-    pc.printf("play = %d\r\n", freq);
   for (int i = 0; i < kAudioTxBufferSize; i++)
   {
     waveform[i] = (int16_t)(sin((double)i * 2. * M_PI / (double)(kAudioSampleFrequency / freq)) * ((1 << 16) - 1));
   }
-  // the loop below will play the note for the duration of 1s
-  
   for(int j = 0; j < kAudioSampleFrequency / kAudioTxBufferSize; ++j)
   {
     audio.spk.play(waveform, kAudioTxBufferSize);
@@ -62,11 +59,11 @@ void uLCDprint(void){
   uLCD.printf("mode = %d\n", mode);
   uLCD.printf("gesture = %d\n", gesture_index);
   if (currentSong == 0){
-    uLCD.printf("\nLittle star\n");
+    uLCD.printf("\n1. Little star\n");
   }else if (currentSong == 1){
-   uLCD.printf("\nLittle  bee\n");
+   uLCD.printf("\n2. Little  bee\n");
   }else if (currentSong == 2){
-    uLCD.printf("\nJingle bell\n");
+    uLCD.printf("\n3. Etude         \n");
   }
   return;
 }
@@ -247,35 +244,38 @@ void loadSignal(void)
   serialCount = 0;
   audio.spk.pause();
   uLCD.locate(1, 1);
-  while(i < 120)
+  while(i < 108)
   {
     if(pc.readable())
     {
       serialInBuffer[serialCount] = pc.getc();
       serialCount++;
-      if(serialCount == 5)
+      if(serialCount == 3)
       {
         serialInBuffer[serialCount] = '\0';
-        song[i] = (float) atof(serialInBuffer) * 1000;
+        song[i] = (int) atoi(serialInBuffer);
         pc.printf("i = %d, %d\r\n", i, song[i]);
         serialCount = 0;
         i++;
       }
     }
   }
-  while(j < 120)
+  while(j < 108)
   {
     if(pc.readable())
     {
       serialInBuffer[serialCount] = pc.getc();
       serialCount++;
-      if(serialCount == 5)
+      if(serialCount == 1)
       {
         serialInBuffer[serialCount] = '\0';
-        noteLength[j] = (float) atof(serialInBuffer) * 1000;
-        pc.printf("j = %d, %d\r\n", j, noteLength[j]);
+        if ((int) atoi(serialInBuffer) != 0){
+          noteLength[j] = (int) atoi(serialInBuffer);
+          pc.printf("j = %d, %d\r\n", j, noteLength[j]);
+          j++;
+        }
         serialCount = 0;
-        j++;
+        
       }
     }
   }
@@ -298,11 +298,11 @@ void playMusic(){
           uLCD.printf("mode = %d\n", mode);
           uLCD.printf("gesture = %d\n", gesture_index);
           if (currentSong == 0){
-            uLCD.printf("\nLittle star\n");
+            uLCD.printf("\n1. Little star\n");
           }else if (currentSong == 1){
-          uLCD.printf("\nLittle  bee\n");
+          uLCD.printf("\n2. Little  bee\n");
           }else if (currentSong == 2){
-            uLCD.printf("\nJingle bell\n");
+            uLCD.printf("\n3. Etude          \n");
           }
           
           uLCD.printf("Playing...\n");
